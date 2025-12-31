@@ -1,61 +1,61 @@
-# Setting Up a Proxy in Axios
+# Axiosでプロキシを設定する
 
-[![Promo](https://github.com/luminati-io/Rotating-Residential-Proxies/blob/main/50%25%20off%20promo.png)](https://brightdata.com/proxy-types/residential-proxies) 
+[![Promo](https://github.com/luminati-io/Rotating-Residential-Proxies/blob/main/50%25%20off%20promo.png)](https://brightdata.jp/proxy-types/residential-proxies) 
 
-This Axios proxy guide covers the following topics:
+このAxiosプロキシガイドでは、以下のトピックを扱います。
 
-1. [Axios and Proxies](#axios-and-proxies)
-2. [Using a Proxy in Axios](#using-a-proxy-in-axios)
-   - [HTTP/HTTPS Proxies](#httphttps-proxies)
-   - [SOCKS Proxies](#socks-proxies)
-3. [Axios Proxy: Advanced Use Cases](#axios-proxy-advanced-use-cases)
-   - [Setting a Proxy Globally](#setting-a-proxy-globally)
-   - [Dealing With Proxy Authentication in Axios](#dealing-with-proxy-authentication-in-axios)
-   - [Setting Proxies via Environment Variables](#setting-proxies-via-environment-variables)
-   - [Implementing Rotating Proxies](#implementing-rotating-proxies)
-4. [Conclusion](#conclusion)
+1. [Axiosとプロキシ](#axios-and-proxies)
+2. [Axiosでプロキシを使用する](#using-a-proxy-in-axios)
+   - [HTTP/HTTPSプロキシ](#httphttps-proxies)
+   - [SOCKSプロキシ](#socks-proxies)
+3. [Axiosプロキシ：高度なユースケース](#axios-proxy-advanced-use-cases)
+   - [プロキシをグローバルに設定する](#setting-a-proxy-globally)
+   - [Axiosでプロキシ認証に対処する](#dealing-with-proxy-authentication-in-axios)
+   - [環境変数でプロキシを設定する](#setting-proxies-via-environment-variables)
+   - [ローテーティングプロキシを実装する](#implementing-rotating-proxies)
+4. [結論](#conclusion)
 
-## Axios and Proxies
+## Axiosとプロキシ
 
-[Axios](https://axios-http.com/) is one the most widely-used HTTP clients in the JavaScript ecosystem. It offers a Promise-based, easy-to-use, intuitive API for performing HTTP requests and dealing with custom headers, configurations, and cookies.
+[Axios](https://axios-http.com/) は、JavaScriptエコシステムで最も広く使われているHTTPクライアントの1つです。HTTPリクエストの実行や、カスタムヘッダー、設定、Cookieの取り扱いに向けて、Promiseベースで使いやすく直感的なAPIを提供します。
 
-By routing your Axios requests through a proxy, you can mask your IP address, making it more challenging for the target server to identify and block you.
+Axiosのリクエストをプロキシ経由でルーティングすることで、IPアドレスを隠蔽でき、ターゲットサーバーがあなたを識別してブロックすることがより難しくなります。
 
-## Using a Proxy in Axios
+## Axiosでプロキシを使用する
 
-Let's set up an HTTP, HTTPS, or SOCKS proxy in Axios. Install the `axios` npm package:
+AxiosでHTTP、HTTPS、またはSOCKSプロキシを設定しましょう。`axios` npmパッケージをインストールします。
 
 ```bash
 npm install axios
 ```
 
-In Node.js, Axios natively supports HTTP and HTTPS proxies via the [`proxy`](https://github.com/axios/axios#request-config) config. So, if you want to use HTTP/HTTPS proxies with Axios in a Node.js application, there is nothing else todo here.
+Node.jsでは、Axiosは[`proxy`](https://github.com/axios/axios#request-config) 設定によりHTTPおよびHTTPSプロキシをネイティブにサポートしています。そのため、Node.jsアプリケーションでAxiosにHTTP/HTTPSプロキシを使いたい場合、ここで他に行うことはありません。
 
-If you instead want to use a non-HTTP/S proxy, you need to rely on the [Proxy Agents](https://github.com/TooTallNate/proxy-agents) project. This provides `http.Agent` implementations to integrate Axios with proxies in different protocols:
+一方で、HTTP/S以外のプロキシを使用したい場合は、[Proxy Agents](https://github.com/TooTallNate/proxy-agents) プロジェクトに頼る必要があります。これは、さまざまなプロトコルのプロキシをAxiosに統合するための `http.Agent` 実装を提供します。
 
-- HTTP and HTTPS proxies: [`https-proxy-agent`](https://github.com/TooTallNate/proxy-agents/blob/main/packages/https-proxy-agent)
-- SOCKS, SOCKS5, and SOCKS4: [`socks-proxy-agent`](https://github.com/TooTallNate/proxy-agents/blob/main/packages/socks-proxy-agent)
-- PAC-\*: [`pac-proxy-agent`](https://github.com/TooTallNate/proxy-agents/blob/main/packages/pac-proxy-agent)
+- HTTPおよびHTTPSプロキシ：[`https-proxy-agent`](https://github.com/TooTallNate/proxy-agents/blob/main/packages/https-proxy-agent)
+- SOCKS、SOCKS5、SOCKS4：[`socks-proxy-agent`](https://github.com/TooTallNate/proxy-agents/blob/main/packages/socks-proxy-agent)
+- PAC-\*：[`pac-proxy-agent`](https://github.com/TooTallNate/proxy-agents/blob/main/packages/pac-proxy-agent)
 
-### HTTP/HTTPS Proxies
+### HTTP/HTTPSプロキシ
 
-The URL of your HTTP/HTTPS proxy should look like this:
+HTTP/HTTPSプロキシのURLは次のような形式になります。
 
 ```
 "<PROXY_PROTOCOL>://<PROXY_HOST>:<PROXY_PORT>"
 ```
 
-- `<PROXY_PROTOCOL>` will be “http” for HTTP proxies and “https” for HTTPS proxies.
-- `<PROXY_HOST>` is generally a raw IP.
-- `<PROXY_PORT>` is the port the proxy server listens to.
+- `<PROXY_PROTOCOL>` は、HTTPプロキシの場合は “http”、HTTPSプロキシの場合は “https” になります。
+- `<PROXY_HOST>` は一般的に生のIPです。
+- `<PROXY_PORT>` はプロキシサーバーが待ち受けるポートです。
 
-For example, suppose this is the URL of your HTTP proxy:
+たとえば、あなたのHTTPプロキシのURLが次のとおりだとします。
 
 ```
 "http://47.88.62.42:80"
 ```
 
-You can set this proxy in Axios as follows:
+このプロキシは、次のようにAxiosで設定できます。
 
 ```js
 axios.get(targetURL, {
@@ -73,17 +73,17 @@ axios.get(targetURL, {
 })
 ```
 
-To verify that the above Axios proxy approach works, retrieve the URL of a free HTTP or HTTPS proxy server. Try this example:
+上記のAxiosプロキシの方法が動作することを検証するには、無料のHTTPまたはHTTPSプロキシサーバーのURLを取得してください。次の例を試してください。
 
 ```
 Protocol: HTTP; IP Address: 52.117.157.155; Port: 8002
 ```
 
-The complete proxy URL will be `http://52.117.157.155:8002`.
+プロキシURL全体は `http://52.117.157.155:8002` になります。
 
-To verify that the proxy works as expected, target the [/ip](https://httpbin.io/ip) endpoint from the HTTPBin project. This public API returns the IP of the incoming request, so it should return the IP of the proxy server.
+プロキシが期待どおりに動作することを確認するには、HTTPBinプロジェクトの [/ip](https://httpbin.io/ip) エンドポイントをターゲットにしてください。この公開APIは受信リクエストのIPを返すため、プロキシサーバーのIPが返るはずです。
 
-The snippet of the Node.js script will be:
+Node.jsスクリプトのスニペットは次のとおりです。
 
 ```js
 import axios from "axios"
@@ -109,18 +109,18 @@ const response = await axios.get("https://httpbin.io/ip", {
 testProxy()
 ```
 
-Execute the script, and it should log:
+スクリプトを実行すると、次のようにログ出力されるはずです。
 
 ```js
 { "origin": "52.117.157.155" }
 ```
 
 > **Warning**:\
-> You will not get the same result if you run the script, because free proxy services are unreliable, slow, error-prone, data-greedy, and short-lived.
+> スクリプトを実行しても同じ結果にはなりません。無料プロキシサービスは信頼性が低く、遅く、エラーが起きやすく、データを貪欲に収集し、寿命も短いからです。
 
-### SOCKS Proxies
+### SOCKSプロキシ
 
-If you try to set the “socks” string in the protocol field of the proxy config object, you will get the following error:
+プロキシ設定オブジェクトのprotocolフィールドに “socks” 文字列を設定しようとすると、次のエラーが発生します。
 
 ```js
 AssertionError [ERR_ASSERTION]: protocol mismatch
@@ -142,36 +142,36 @@ AssertionError [ERR_ASSERTION]: protocol mismatch
 }
 ```
 
-That is because Axios does not natively support SOCKS proxies. Add the `socks-proxy-agent` npm library to your project’s dependencies:
+これは、AxiosがSOCKSプロキシをネイティブにサポートしていないためです。`socks-proxy-agent` npmライブラリをプロジェクトの依存関係に追加してください。
 
 ```bash
 npm install socks-proxy-agent
 ```
 
-This package allows you to connect to a SOCKS proxy server while making HTTP or HTTPS requests in Axios.
+このパッケージにより、AxiosでHTTPまたはHTTPSリクエストを行いながら、SOCKSプロキシサーバーに接続できます。
 
-Then, import the SOCKS proxy agent implementation from the library:
+次に、ライブラリからSOCKSプロキシagent実装をインポートします。
 
 ```js
 const SocksProxyAgent = require("socks-proxy-agent")
 ```
 
-Or if you are an ESM user:
+または、ESMユーザーの場合は次のとおりです。
 
 ```js
 import { SocksProxyAgent } from "socks-proxy-agent"
 ```
 
-Suppose this is the URL of your SOCKS proxy:
+あなたのSOCKSプロキシのURLが次のとおりだとします。
 
 ```
 "socks://183.88.74.73:4153"
 ```
 
 > **Note**:\
-> The proxy protocol can be either “socks”, “socks5”, or “socks4”.
+> プロキシプロトコルは “socks”、 “socks5”、または “socks4” のいずれかにできます。
 
-Store it in a variable and pass it to the `SocksProxyAgent` constructor:
+これを変数に格納し、`SocksProxyAgent` コンストラクタに渡します。
 
 ```js
 const proxyURL = "socks://183.88.74.73:4153"
@@ -179,9 +179,9 @@ const proxyURL = "socks://183.88.74.73:4153"
 const proxyAgent = new SocksProxyAgent(proxyURL)
 ```
 
-`SocksProxyAgent()` initializes an `http.Agent` instance to perform HTTP/HTTPS requests through the proxy URL.
+`SocksProxyAgent()` は、プロキシURL経由でHTTP/HTTPSリクエストを実行するための `http.Agent` インスタンスを初期化します。
 
-You can now use a SOCKS proxy with Axios as follows:
+これで、次のようにAxiosでSOCKSプロキシを使用できます。
 
 ```js
 axios.get(targetURL, { 
@@ -193,9 +193,9 @@ axios.get(targetURL, { 
 })
 ```
 
-`httpAgent` and `httpsAgent` define the custom agent to use when performing HTTP and HTTPS requests, respectively. In other words, the HTTP or HTTPS request made by Axios will go through the specified SOCKS proxy. In a similar way, you can use the [`https-proxy-agent`](https://www.npmjs.com/package/https-proxy-agent) npm package as an alternative way to set HTTP/HTTPS proxies in Axios.
+`httpAgent` と `httpsAgent` は、それぞれHTTPおよびHTTPSリクエストを実行する際に使用するカスタムagentを定義します。言い換えると、Axiosが行うHTTPまたはHTTPSリクエストは、指定したSOCKSプロキシを経由します。同様に、AxiosでHTTP/HTTPSプロキシを設定する別の方法として、[`https-proxy-agent`](https://www.npmjs.com/package/https-proxy-agent) npmパッケージを使用することもできます。
 
-Put it all together:
+すべてをまとめると次のようになります。
 
 ```js
 import axios from "axios"
@@ -231,15 +231,15 @@ async function testProxy() {
 testProxy()
 ```
 
-Follow the link for other examples of [how to configure a SOCKS proxy in Axios](https://writech.run/blog/how-to-use-a-socks-proxy-in-axios-6c0355a2e013/).
+他の例については、[AxiosでSOCKSプロキシを設定する方法](https://writech.run/blog/how-to-use-a-socks-proxy-in-axios-6c0355a2e013/) のリンクをご参照ください。
 
-## Axios Proxy: Advanced Use Cases
+## Axiosプロキシ：高度なユースケース
 
-[![Promo](https://github.com/luminati-io/LinkedIn-Scraper/blob/main/Proxies%20and%20scrapers%20GitHub%20bonus%20banner.png)](https://brightdata.com/proxy-types/residential-proxies) 
+[![Promo](https://github.com/luminati-io/LinkedIn-Scraper/blob/main/Proxies%20and%20scrapers%20GitHub%20bonus%20banner.png)](https://brightdata.jp/proxy-types/residential-proxies) 
 
-### Setting a Proxy Globally
+### プロキシをグローバルに設定する
 
-You can set a proxy globally by specifying it directly in an Axios instance:
+Axiosインスタンスに直接指定することで、プロキシをグローバルに設定できます。
 
 ```js
 const axiosInstance = axios.create({
@@ -259,7 +259,7 @@ const axiosInstance = axios.create({
 })
 ```
 
-Or if you are a Proxy Agents user:
+または、Proxy Agentsユーザーであれば次のとおりです。
 
 ```js
 // proxy Agent definition ...
@@ -273,7 +273,7 @@ const axiosInstance = axios.create({
 })
 ```
 
-Here’s how you configure Axios to use a SOCKS proxy globally:
+SOCKSプロキシをグローバルに使用するようにAxiosを設定する方法は次のとおりです。
 
 ```js
 import { SocksProxyAgent } from "socks-proxy-agent";
@@ -291,25 +291,25 @@ const axiosInstance = axios.create({
 });
 ```
 
-All requests made with `axiosInstance` will now automatically go through the specified proxy.
+`axiosInstance` で行われるすべてのリクエストは、以後自動的に指定のプロキシを経由します。
 
-### Dealing With Proxy Authentication in Axios
+### Axiosでプロキシ認証に対処する
 
-To allow only paying users access to premium proxies, proxy providers protect them with authentication. Trying to connect to an authenticated proxy without a username and password will result in a [407 Proxy Authentication Required](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/407) error.
+プレミアムプロキシへのアクセスを有料ユーザーのみに許可するため、プロキシプロバイダーは認証で保護しています。ユーザー名とパスワードなしで認証付きプロキシに接続しようとすると、[407 Proxy Authentication Required](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/407) エラーになります。
 
-In particular, here is the syntax of the URL of an authenticated proxy:
+特に、認証付きプロキシのURL構文は次のとおりです。
 
 ```
 [<PROTOCOL>://]<USERNAME>:<PASSWORD>@<HOST>[:<PORT>]
 ```
 
-For example, a real-world URL to connect to an authenticated proxy might be:
+たとえば、認証付きプロキシに接続する実世界のURLは次のようになります。
 
 ```
 http://admin:lK4w90MEe45YIkOpk@156.127.0.192:8391
 ```
 
-In this case, the proxy URL field would be:
+この場合、プロキシURLフィールドは次のとおりです。
 
 - `<PROTOCOL>:HTTP`
 - `<HOST>:156.127.0.192`
@@ -317,7 +317,7 @@ In this case, the proxy URL field would be:
 - `<USERNAME>:admin`
 - `<PASSWORD>:lK4w90MEe45YIkOpk`
 
-To deal with proxy authentication in Axios, specify the username and password in the `authfield` of `proxy`:
+Axiosでプロキシ認証に対処するには、`proxy` の `authfield` にユーザー名とパスワードを指定します。
 
 ```js
 axios.get(targetURL, {
@@ -343,15 +343,15 @@ axios.get(targetURL, {
 })
 ```
 
-If you are instead a Proxy Agents user, you have two ways to deal with authentication:
+一方、Proxy Agentsユーザーの場合は、認証に対処する方法が2つあります。
 
-1. Add the credentials directly in the proxy URL:
+1. 認証情報をプロキシURLに直接追加します。
 
 ```js
 var proxyAgent = new SocksProxyAgent("http://admin:[email protected]:8391")
 ```
 
-2. Set the `username` and `password` options in a [URL](https://nodejs.org/api/url.html) object:
+2. [URL](https://nodejs.org/api/url.html) オブジェクトで `username` と `password` オプションを設定します。
 
 ```js
 const proxyOpts = new URL("http://156.127.0.192:8391")
@@ -363,16 +363,16 @@ proxyOpts.password = "lK4w90MEe45YIkOpk"
 const proxyAgent = new SocksProxyAgent(proxyOpts)
 ```
 
-The same approaches also work with HttpsProxyAgent.
+同じ方法はHttpsProxyAgentでも機能します。
 
-### Setting Proxies via Environment Variables
+### 環境変数でプロキシを設定する
 
-Another way to configure a proxy globally in Axios is by setting the following environment variables:
+Axiosでプロキシをグローバルに設定する別の方法として、次の環境変数を設定する方法があります。
 
-- `HTTP_PROXY`: The URL of the proxy server to use for HTTP requests.
-- `HTTPS_PROXY`: The URL of the proxy server to use for HTTPS requests.
+- `HTTP_PROXY`：HTTPリクエストに使用するプロキシサーバーのURLです。
+- `HTTPS_PROXY`：HTTPSリクエストに使用するプロキシサーバーのURLです。
 
-On Linux or macOS, you can set them like this:
+LinuxまたはmacOSでは、次のように設定できます。
 
 ```bash
 export HTTP_PROXY = "[<PROTOCOL>://]<USERNAME>:<PASSWORD>@<HOST>[:<PORT>]"
@@ -380,27 +380,27 @@ export HTTP_PROXY = "[<PROTOCOL>://]<USERNAME>:<PASSWORD>@<HOST>[:<PORT>]"
 export HTTPS_PROXY = "[<PROTOCOL>://]<USERNAME>:<PASSWORD>@<HOST>[:<PORT>]"
 ```
 
-When Axios detects these environment variables, it reads from them the proxy settings, including the credentials for authentication. Set the `proxy` field to `false` to make Axios ignore those environment variables. Keep in mind that you can also define a `NO_PROXY` env as a comma-separated list of domains that should not be proxied.
+Axiosがこれらの環境変数を検出すると、認証用の認証情報を含むプロキシ設定をそれらから読み取ります。Axiosにそれらの環境変数を無視させるには、`proxy` フィールドを `false` に設定してください。なお、プロキシを経由させないべきドメインのカンマ区切りリストとして `NO_PROXY` env を定義することも可能です。
 
-Note that the same mechanism also works when [using proxies in cURL](https://brightdata.com/blog/proxy-101/curl-with-proxies).
+同じ仕組みは、[cURLでプロキシを使用する](https://brightdata.jp/blog/proxy-101/curl-with-proxies) 場合にも機能します。
 
-### Implementing Rotating Proxies
+### ローテーティングプロキシを実装する
 
-To prevent the target site from blocking your proxy's IP address, ensure that each request you perform originates from a different proxy server:
+ターゲットサイトにプロキシのIPアドレスをブロックされないようにするには、実行する各リクエストが異なるプロキシサーバーから発信されるようにしてください。
 
-1. Define a list of objects, each containing the information to connect to a different proxy.
-2. Randomly select a proxy object before each request.
-3. Configure the selected proxy in Axios.
+1. それぞれが異なるプロキシへの接続情報を含むオブジェクトのリストを定義します。
+2. 各リクエストの前にプロキシオブジェクトをランダムに選択します。
+3. 選択したプロキシをAxiosで設定します。
 
-The approach outlined above assumes that you have access to a pool of reliable proxy servers, such as the [rotating proxies](https://brightdata.com/solutions/rotating-proxies) that Bright Data offers.
+上記のアプローチは、Bright Dataが提供する [ローテーティングプロキシ](https://brightdata.jp/solutions/rotating-proxies) のような、信頼性の高いプロキシサーバーのプールにアクセスできることを前提としています。
 
-## Conclusion
+## 結論
 
-Bright Data controls the best proxy servers in the world, serving Fortune 500 companies and over 20,000 customers. Its worldwide proxy network involves:
+Bright Dataは世界最高のプロキシサーバーを管理しており、Fortune 500企業や20,000社以上のお客様に提供しています。世界規模のプロキシネットワークには以下が含まれます。
 
-*   [Datacenter proxies](https://brightdata.com/proxy-types/datacenter-proxies) – Over 770,000 datacenter IPs.
-*   [Residential proxies](https://brightdata.com/proxy-types/residential-proxies) – Over 72M residential IPs in more than 195 countries.
-*   [ISP proxies](https://brightdata.com/proxy-types/isp-proxies) – Over 700,000 ISP IPs.
-*   [Mobile proxies](https://brightdata.com/proxy-types/mobile-proxies) – Over 7M mobile IPs.
+*   [Datacenter proxies](https://brightdata.jp/proxy-types/datacenter-proxies) – 770,000超のデータセンターIP。
+*   [Residential proxies](https://brightdata.jp/proxy-types/residential-proxies) – 195か国以上にわたる7,200万超のレジデンシャルIP。
+*   [ISP proxies](https://brightdata.jp/proxy-types/isp-proxies) – 700,000超のISP IP。
+*   [Mobile proxies](https://brightdata.jp/proxy-types/mobile-proxies) – 700万超のモバイルIP。
 
-[Create a free Bright Data account](https://brightdata.com/#popup-155639) today to try our proxy servers.
+当社のプロキシサーバーを試すには、今すぐ[無料のBright Dataアカウントを作成](https://brightdata.jp/#popup-155639)してください。
